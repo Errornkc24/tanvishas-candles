@@ -1,0 +1,14 @@
+{
+  "name": "tanvisas-candles",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others -n API,WEB -c green,blue \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build": "npm run typecheck --prefix frontend && npm run build --prefix frontend && npm run typecheck --prefix backend",
+    "typecheck": "npm run typecheck --prefix frontend && npm run typecheck --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

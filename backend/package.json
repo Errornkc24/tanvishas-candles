@@ -1,0 +1,26 @@
+{
+  "name": "@tanvisas-candles/backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file=.env --import tsx --watch src/server.ts",
+    "start": "node --env-file=.env --import tsx src/server.ts",
+    "test": "node --import tsx --test src/modules/payments/razorpay-signature.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.16.5",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

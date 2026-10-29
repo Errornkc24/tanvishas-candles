@@ -1,0 +1,15 @@
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: { tsconfigPaths: true },
+  server: {
+    allowedHosts: ["refill-antihero-sincere.ngrok-free.dev"],
+    proxy: {
+      "/api": { target: "http://localhost:3001", changeOrigin: true },
+    },
+  },
+  build: { outDir: "dist", sourcemap: true },
+});
