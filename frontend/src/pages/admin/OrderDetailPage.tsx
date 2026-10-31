@@ -33,7 +33,6 @@ export function OrderDetail() {
   const c = contactOf(o);
   const a = addressOf(o);
   const locked = o.status === "cancelled" || o.status === "delivered";
-  const nextStatus = ORDER_STEPS[ORDER_STEPS.indexOf(o.status) + 1];
 
   async function update(next: OrderStatus) {
     if (next === "cancelled" && !confirm("Cancel this order? Stock will be returned.")) return;
@@ -137,7 +136,7 @@ export function OrderDetail() {
                   value={status}
                   onChange={(e) => setStatus(e.target.value as OrderStatus)}
                 >
-                  {[o.status, ...(nextStatus ? [nextStatus] : [])].map((s) => (
+                  {[o.status, ...ORDER_STEPS.slice(ORDER_STEPS.indexOf(o.status) + 1)].map((s) => (
                     <option key={s} value={s}>
                       {STATUS_LABEL[s]}
                     </option>

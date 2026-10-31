@@ -125,7 +125,7 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-8 text-sm uppercase tracking-[0.2em] md:flex">
+        <nav className="hidden items-center gap-2 text-sm uppercase tracking-[0.12em] md:flex">
           {nav.map((n) => (
             <NavLink
               key={n.to}
@@ -133,8 +133,8 @@ export function SiteHeader() {
               end={n.to === "/"}
               className={({ isActive }) =>
                 cn(
-                  "text-muted-foreground transition-colors hover:text-primary",
-                  isActive && "text-primary",
+                  "rounded-full px-5 py-2 font-medium text-foreground/90 transition-colors hover:bg-accent hover:text-foreground",
+                  isActive && "bg-accent text-foreground",
                 )
               }
             >

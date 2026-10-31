@@ -1,10 +1,15 @@
 import { Link } from "react-router-dom";
-import { Flame, Heart, Instagram, Leaf, Quote } from "lucide-react";
+import { Flame, Heart, Instagram, Leaf, Mail, MessageCircle, Quote, Youtube } from "lucide-react";
 import { AmbientBackground } from "@/components/layout/AmbientBackground";
 import { ProductCard, ProductCardSkeleton } from "@/components/shop/ProductCard";
 import { Reveal } from "@/components/layout/Reveal";
 import { Button } from "@/components/ui/button";
-import { INSTAGRAM_URL } from "@/components/layout/SiteFooter";
+import {
+  CONTACT_EMAIL,
+  INSTAGRAM_URL,
+  WHATSAPP_URL,
+  YOUTUBE_URL,
+} from "@/components/layout/SiteFooter";
 import { useProducts, useCategories } from "@/hooks/useProducts";
 
 const testimonials = [
@@ -56,19 +61,9 @@ export function Home() {
   const best = (products ?? []).filter((p) => p.bestseller).slice(0, 4);
 
   return (
-    <>
+    <div className="home-candle-background relative isolate">
       {/* Hero */}
       <section className="relative -mt-16 overflow-hidden pt-16 sm:-mt-20 sm:pt-20">
-        <div className="absolute inset-0">
-          <img
-            src="/images/catalog/lotus-candle.webp"
-            alt=""
-            width={1600}
-            height={1104}
-            className="h-full w-full object-cover opacity-45"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background" />
-        </div>
         <AmbientBackground density={1.8} />
         <div className="relative mx-auto flex min-h-[86vh] max-w-7xl flex-col items-center justify-center px-6 py-20 text-center">
           <img
@@ -229,21 +224,71 @@ export function Home() {
         </div>
       </Section>
 
-      <section className="mx-auto max-w-4xl px-6">
-        <Reveal className="relative overflow-hidden rounded-3xl border bg-card-gradient p-10 text-center sm:p-14">
-          <AmbientBackground density={0.5} />
-          <Instagram className="relative mx-auto h-10 w-10 text-primary" aria-hidden />
-          <h2 className="relative mt-4 text-4xl">Join us on Instagram</h2>
-          <p className="relative mt-3 text-muted-foreground">
-            Behind-the-scenes pours, new scent drops and cozy corners.
+      <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">
+        <Reveal className="mb-8 text-center">
+          <span className="font-brand text-xs font-semibold tracking-[0.35em] text-primary">
+            SAY HELLO
+          </span>
+          <h2 className="mt-2 text-4xl sm:text-5xl">Find us around the web</h2>
+          <p className="mt-3 text-muted-foreground">
+            Follow along, watch our pours, or get in touch.
           </p>
-          <Button asChild size="lg" className="relative mt-8">
-            <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
-              @tanvisha.candles
-            </a>
-          </Button>
         </Reveal>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              name: "Instagram",
+              blurb: "Behind-the-scenes pours and new scent drops.",
+              text: "@tanvisha.candles",
+              href: INSTAGRAM_URL,
+              icon: Instagram,
+            },
+            {
+              name: "WhatsApp",
+              blurb: "Questions about a candle or your order?",
+              text: "Chat with us",
+              href: WHATSAPP_URL,
+              icon: MessageCircle,
+            },
+            {
+              name: "YouTube",
+              blurb: "Watch candle making and studio moments.",
+              text: "Tanvishas Candles",
+              href: YOUTUBE_URL,
+              icon: Youtube,
+            },
+            {
+              name: "Email",
+              blurb: "We’d love to hear from you.",
+              text: CONTACT_EMAIL,
+              href: `mailto:${CONTACT_EMAIL}`,
+              icon: Mail,
+            },
+          ].map((item) => (
+            <Reveal
+              key={item.name}
+              className="relative flex min-h-64 flex-col items-center overflow-hidden rounded-3xl border bg-card-gradient px-5 py-7 text-center shadow-soft"
+            >
+              <AmbientBackground density={0.35} />
+              <item.icon className="relative h-9 w-9 text-primary" aria-hidden />
+              <h3 className="relative mt-4 text-2xl font-semibold">{item.name}</h3>
+              <p className="relative mt-2 flex min-h-12 items-start justify-center text-sm font-medium text-muted-foreground">
+                {item.blurb}
+              </p>
+              <Button asChild size="sm" className="relative mt-6 max-w-full">
+                <a
+                  href={item.href}
+                  target={item.href.startsWith("mailto:") ? undefined : "_blank"}
+                  rel="noreferrer"
+                  className="truncate"
+                >
+                  {item.text}
+                </a>
+              </Button>
+            </Reveal>
+          ))}
+        </div>
       </section>
-    </>
+    </div>
   );
 }

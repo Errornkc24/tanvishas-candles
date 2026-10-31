@@ -69,10 +69,10 @@
   --primary: #a8823f;
   --primary-glow: #c69d56;
   --primary-foreground: #fffaf1;
-  --secondary: #4a5636;
-  --secondary-foreground: #fffaf1;
+  --secondary: #b7c99a;
+  --secondary-foreground: #273522;
   --muted: #efe3cf;
-  --muted-foreground: #7a6048;
+  --muted-foreground: #624b37;
   --accent: #efe3cf;
   --accent-foreground: #2b3623;
   --bloom: #7a6048;
@@ -98,7 +98,9 @@
   --sidebar-ring: #a8823f;
 
   --gradient-gold: linear-gradient(135deg, #c69d56, #a8823f);
-  --gradient-night: radial-gradient(60% 40% at 50% 0%, rgb(224 176 92 / 14%), transparent 70%), radial-gradient(50% 30% at 90% 100%, rgb(122 96 72 / 7%), transparent 70%);
+  --gradient-night:
+    radial-gradient(60% 40% at 50% 0%, rgb(224 176 92 / 14%), transparent 70%),
+    radial-gradient(50% 30% at 90% 100%, rgb(122 96 72 / 7%), transparent 70%);
   --gradient-card: linear-gradient(180deg, #fffaf1, #f7efdf);
   --shadow-glow: 0 10px 28px -14px rgb(91 70 40 / 35%);
   --shadow-soft: 0 20px 50px -20px rgb(91 70 40 / 28%);
@@ -119,13 +121,37 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
     font-weight: 500;
     letter-spacing: 0.01em;
   }
+  :where(p, label, small, li, td, th, input, select, textarea) {
+    font-weight: 450;
+  }
   ::selection {
     background: oklch(0.8 0.125 75 / 35%);
+  }
+}
+
+.home-candle-background {
+  background-image:
+    linear-gradient(rgb(251 245 235 / 58%), rgb(251 245 235 / 68%)),
+    url("/images/catalog/lotus-candle.webp");
+  background-position: center, center center;
+  background-size: 100% 100%, auto 100vh;
+  background-attachment: fixed;
+  background-repeat: no-repeat, no-repeat;
+}
+
+@media (min-width: 768px) {
+  .home-candle-background {
+    background-position: center top;
+    background-size: 100vw auto;
+    background-repeat: no-repeat;
   }
 }
 
@@ -133,6 +159,14 @@
   font-family: var(--font-brand);
   letter-spacing: 0.06em;
 }
+
+@layer utilities {
+  .font-brand.text-xs[class*="tracking-"] {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+}
+
 @utility font-script {
   font-family: var(--font-script);
   font-style: italic;
@@ -164,7 +198,9 @@
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .reveal.is-visible {
   opacity: 1;
@@ -172,28 +208,55 @@
 }
 
 @keyframes cart-pop {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.35); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 .animate-cart-pop {
   animation: cart-pop 0.45s ease;
 }
 @keyframes flame-flicker {
-  0%, 100% { opacity: 0.85; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.06); }
+  0%,
+  100% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
 }
 .animate-flicker {
   animation: flame-flicker 3s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; transform: none; transition: none; }
-  .animate-cart-pop, .animate-flicker { animation: none; }
-  html { scroll-behavior: auto; }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-cart-pop,
+  .animate-flicker {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 @media print {
-  body { background: white; color: black; }
-  .no-print { display: none !important; }
+  body {
+    background: white;
+    color: black;
+  }
+  .no-print {
+    display: none !important;
+  }
 }

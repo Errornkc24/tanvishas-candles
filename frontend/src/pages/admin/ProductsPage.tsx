@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { supabase } from "@/lib/supabase";
 
 type P = Awaited<ReturnType<NonNullable<typeof adminProductsQuery.queryFn>>>[number];
 
@@ -236,6 +237,7 @@ function ProductForm({ product, onDone }: { product: P | null; onDone: () => voi
     archived: product?.archived ?? false,
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const t = (k: keyof typeof f) => ({
     value: f[k] as string,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -290,6 +292,47 @@ function ProductForm({ product, onDone }: { product: P | null; onDone: () => voi
     }
     toast.success("Saved");
     onDone();
+  }
+
+  async function uploadPhotos(files: File[]) {
+    if (!files?.length) return;
+    setUploading(true);
+    const urls: string[] = [];
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not an image`);
+        continue;
+      }
+      if (file.size > 8 * 1024 * 1024) {
+        toast.error(`${file.name} is larger than 8 MB`);
+        continue;
+      }
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+      const path = `${crypto.randomUUID()}-${safeName}`;
+      const { error } = await supabase.storage.from("product-images").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+      if (error) {
+        toast.error(`Could not upload ${file.name}: ${error.message}`);
+        continue;
+      }
+      urls.push(supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl);
+    }
+    if (urls.length) {
+      setF((current) => ({
+        ...current,
+        images: [
+          ...current.images
+            .split("\n")
+            .map((url) => url.trim())
+            .filter(Boolean),
+          ...urls,
+        ].join("\n"),
+      }));
+      toast.success(`${urls.length} photo${urls.length === 1 ? "" : "s"} uploaded`);
+    }
+    setUploading(false);
   }
 
   return (
@@ -350,6 +393,41 @@ function ProductForm({ product, onDone }: { product: P | null; onDone: () => voi
         <Field label="Photo links (one per line)">
           <Textarea rows={3} {...t("images")} placeholder="https://…" />
         </Field>
+      </div>
+      <div className="space-y-2 sm:col-span-2">
+        <Label htmlFor="product-photo-upload">Or upload photos from this device</Label>
+        <Input
+          id="product-photo-upload"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          multiple
+          disabled={uploading}
+          onChange={(event) => {
+            void uploadPhotos(Array.from(event.target.files ?? []));
+            event.target.value = "";
+          }}
+        />
+        <p className="text-xs text-muted-foreground">
+          On a phone, choose Camera to take a photo or select images already on your device. Maximum
+          8 MB each.
+          {uploading ? " Uploading…" : ""}
+        </p>
+        {f.images.trim() && (
+          <div className="flex flex-wrap gap-2">
+            {f.images
+              .split("\n")
+              .filter(Boolean)
+              .map((url) => (
+                <img
+                  key={url}
+                  src={url}
+                  alt="Product preview"
+                  className="h-16 w-16 rounded-lg border object-cover"
+                />
+              ))}
+          </div>
+        )}
       </div>
       <div className="flex flex-wrap gap-6 sm:col-span-2">
         {(["featured", "bestseller", "archived"] as const).map((k) => (

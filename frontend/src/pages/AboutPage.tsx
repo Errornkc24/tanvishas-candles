@@ -40,7 +40,7 @@ export function About() {
       </div>
       <div className="mt-12 flex justify-center">
         <Button asChild size="lg">
-          <Link to="/shop">Find your scent</Link>
+          <Link to="/shop">Explore the candle collection</Link>
         </Button>
       </div>
     </div>
