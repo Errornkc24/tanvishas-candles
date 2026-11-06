@@ -43,7 +43,7 @@ function AppLayout() {
         <main className="flex-1">
           <Outlet />
         </main>
-        <div className="print:hidden">
+        <div className="relative z-10 print:hidden">
           <SiteFooter />
         </div>
       </div>

@@ -4,6 +4,26 @@ import type { Database } from "@/types/database.types";
 
 export type AdminRole = Database["public"]["Enums"]["app_role"];
 export type Order = Database["public"]["Tables"]["orders"]["Row"];
+export type DashboardSummary = {
+  orders_today: number;
+  sales_today: number;
+  sales_this_month: number;
+  to_pack_count: number;
+  recent_orders: Pick<Order, "id" | "order_number" | "created_at" | "status" | "total" | "contact">[];
+  low_stock: Pick<
+    Database["public"]["Tables"]["products"]["Row"],
+    "id" | "name" | "stock" | "low_stock_threshold"
+  >[];
+};
+
+export const adminDashboardQuery = queryOptions({
+  queryKey: ["admin", "dashboard"],
+  queryFn: async (): Promise<DashboardSummary> => {
+    const { data, error } = await supabase.rpc("admin_dashboard_summary");
+    if (error) throw error;
+    return data as unknown as DashboardSummary;
+  },
+});
 
 export const rolesQuery = (userId: string) =>
   queryOptions({
@@ -53,7 +73,11 @@ export const adminOrdersQuery = queryOptions({
 
 export const storeHasOwnerQuery = queryOptions({
   queryKey: ["store_has_owner"],
-  queryFn: async () => (await supabase.rpc("store_has_owner")).data ?? true,
+  queryFn: async () => {
+    const { data, error } = await supabase.rpc("store_has_owner");
+    if (error) throw error;
+    return data ?? true;
+  },
 });
 
 export function claimStoreOwnership() {
@@ -71,7 +95,7 @@ export function createProduct(values: Database["public"]["Tables"]["products"]["
   return supabase.from("products").insert(values).select("id").single();
 }
 
-export function contactOf(o: Order) {
+export function contactOf(o: Pick<Order, "contact">) {
   return (o.contact ?? {}) as Record<string, string>;
 }
 export function addressOf(o: Order) {

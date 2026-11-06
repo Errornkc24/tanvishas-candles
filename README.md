@@ -49,4 +49,4 @@ Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `VITE_API_URL` in the fro
 
 ## Database setup
 
-The migrations create an empty schema with the store's tables, policies, triggers, admin roles, and transactional order/stock functions. They do not copy customer accounts, products, or order history. Configure email and Google OAuth redirect URLs in the new Supabase project; users will sign in to that project.
+The migrations create an empty schema with the store's tables, policies, triggers, admin roles, transactional order/stock functions, and the backend's 24-hour session-expiry helper. Apply all migrations before using authenticated API routes. They do not copy customer accounts, products, or order history. Configure email and Google OAuth redirect URLs in the new Supabase project; users will sign in to that project.

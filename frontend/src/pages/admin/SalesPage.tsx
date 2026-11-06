@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@/hooks/use-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ArrowDownToLine, ArrowLeft, ArrowRight, RefreshCw, TrendingUp } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { adminSalesQuery } from "@/services/sales.service";
+import { adminSalesReportQuery } from "@/services/sales.service";
 import {
   indiaDate,
   previousRange,
   salesCsv,
   salesRange,
-  summarizeSales,
   type Granularity,
+  type SalesReport,
 } from "@/lib/sales-helpers";
 import { STATUS_LABEL } from "@/lib/shop-helpers";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,28 @@ const chartConfig = {
   revenue: { label: "Order sales", color: "var(--chart-1)" },
   collected: { label: "Collected", color: "var(--success)" },
 };
+const emptyReport: SalesReport = {
+  effective_from: "",
+  effective_to: "",
+  selected: [],
+  live_count: 0,
+  revenue: 0,
+  collected: 0,
+  outstanding: 0,
+  subtotal: 0,
+  shipping: 0,
+  cancelled: 0,
+  cancelled_value: 0,
+  cancelled_paid: 0,
+  average: 0,
+  units: 0,
+  products: [],
+  periods: [],
+  statuses: {},
+  payments: [],
+  prior_revenue: 0,
+  growth_percent: null,
+};
 function download(rows: (string | number)[][], name: string) {
   const url = URL.createObjectURL(new Blob([salesCsv(rows)], { type: "text/csv;charset=utf-8;" }));
   const a = document.createElement("a");
@@ -57,59 +79,32 @@ function download(rows: (string | number)[][], name: string) {
   URL.revokeObjectURL(url);
 }
 export function Sales() {
-  const {
-    data: orders = [],
-    isPending,
-    isError,
-    isFetching,
-    refetch,
-    dataUpdatedAt,
-  } = useQuery(adminSalesQuery);
   const [today] = useState(() => indiaDate(new Date()));
   const [preset, setPreset] = useState("month");
   const [custom, setCustom] = useState(salesRange("month", today));
   const [group, setGroup] = useState<Granularity>("day");
   const [page, setPage] = useState(0);
-  const earliest = orders.length ? indiaDate(orders[orders.length - 1].created_at) : today;
-  const range = preset === "custom" ? custom : salesRange(preset, today, earliest);
+  const range = preset === "custom" ? custom : salesRange(preset, today, "0001-01-01");
   const invalid = !range.from || !range.to || range.from > range.to;
-  const report = useMemo(
-    () => summarizeSales(orders, invalid ? today : range.from, invalid ? today : range.to, group),
-    [orders, range.from, range.to, group, invalid, today],
+  const query = useQuery(
+    adminSalesReportQuery(invalid ? today : range.from, invalid ? today : range.to, group, !invalid),
   );
-  const previous = previousRange(invalid ? today : range.from, invalid ? today : range.to);
-  const prior = useMemo(
-    () => summarizeSales(orders, previous.from, previous.to, "month"),
-    [orders, previous.from, previous.to],
-  );
-  const growth = prior.revenue ? ((report.revenue - prior.revenue) / prior.revenue) * 100 : null;
+  const { isError, isFetching, refetch, dataUpdatedAt } = query;
+  const report = query.data ?? emptyReport;
+  const isPending = invalid ? false : query.isPending;
+  const effectiveFrom = report.effective_from || range.from;
+  const effectiveTo = report.effective_to || range.to;
+  const previous = previousRange(effectiveFrom, effectiveTo);
   const statuses = Object.entries(STATUS_LABEL).map(([status, label]) => ({
     label,
-    count: report.selected.filter((o) => o.status === status).length,
+    count: report.statuses[status] ?? 0,
   }));
-  const payments = [
-    { label: "Online", method: "online" },
-    { label: "Cash on Delivery", method: "cod" },
-    ...(report.live.some((o) => !["online", "cod"].includes(o.payment_method))
-      ? [{ label: "Other", method: "other" }]
-      : []),
-  ].map((p) => {
-    const rows = report.live.filter((o) =>
-      p.method === "other"
-        ? !["online", "cod"].includes(o.payment_method)
-        : o.payment_method === p.method,
-    );
-    const value = rows.reduce((n, o) => n + Number(o.total), 0);
-    const paid = rows
-      .filter((o) => o.payment_status === "paid")
-      .reduce((n, o) => n + Number(o.total), 0);
-    return { ...p, count: rows.length, value, paid, pending: value - paid };
-  });
+  const payments = report.payments;
   function exportReport() {
     download(
       [
         ["Tanvishas Candles — Sales report"],
-        ["From (India)", range.from, "To (India)", range.to],
+        ["From (India)", effectiveFrom, "To (India)", effectiveTo],
         [
           "Basis",
           "Order placement date; cancelled orders excluded from sales; sales include shipping",
@@ -119,11 +114,11 @@ export function Sales() {
         ["Outstanding INR", report.outstanding],
         ["Product sales INR", report.subtotal],
         ["Shipping INR", report.shipping],
-        ["Orders", report.live.length],
+        ["Orders", report.live_count],
         ["Units", report.units],
         ["Cancelled orders", report.cancelled],
-        ["Cancelled value INR", report.cancelledValue],
-        ["Paid cancelled value INR (refunds untracked)", report.cancelledPaid],
+        ["Cancelled value INR", report.cancelled_value],
+        ["Paid cancelled value INR (refunds untracked)", report.cancelled_paid],
         [],
         ["Period", "Orders", "Sales INR", "Collected INR", "Outstanding INR", "Cancelled orders"],
         ...report.periods.map((p) => [
@@ -162,7 +157,7 @@ export function Sales() {
           o.total,
         ]),
       ],
-      `tanvisha-sales-${range.from}-${range.to}.csv`,
+      `tanvisha-sales-${effectiveFrom}-${effectiveTo}.csv`,
     );
   }
   function drill(period: string) {
@@ -203,7 +198,7 @@ export function Sales() {
         <div>
           <h2 className="text-3xl">Sales</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {periodLabel(range.from || today)} — {periodLabel(range.to || today)} · India time
+            {periodLabel(effectiveFrom || today)} — {periodLabel(effectiveTo || today)} · India time
           </p>
         </div>
         <div className="flex gap-2">
@@ -301,11 +296,11 @@ export function Sales() {
                 label: "Order sales",
                 value: money(report.revenue),
                 detail:
-                  growth === null
+                  report.growth_percent === null
                     ? report.revenue
                       ? "No sales in preceding period"
                       : "No change from preceding period"
-                    : `${growth >= 0 ? "+" : ""}${growth.toFixed(1)}% vs preceding period`,
+                    : `${report.growth_percent >= 0 ? "+" : ""}${report.growth_percent.toFixed(1)}% vs preceding period`,
                 color: "text-primary",
               },
               {
@@ -322,7 +317,7 @@ export function Sales() {
               },
               {
                 label: "Orders",
-                value: report.live.length.toLocaleString("en-IN"),
+                value: report.live_count.toLocaleString("en-IN"),
                 detail: `${report.units} units · ${report.cancelled} cancelled`,
                 color: "text-foreground",
               },
@@ -527,9 +522,9 @@ export function Sales() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Cancelled value: {money(report.cancelledValue)}.
-                {report.cancelledPaid > 0 &&
-                  ` Paid cancelled orders: ${money(report.cancelledPaid)}; refund status is not tracked.`}
+                Cancelled value: {money(report.cancelled_value)}.
+                {report.cancelled_paid > 0 &&
+                  ` Paid cancelled orders: ${money(report.cancelled_paid)}; refund status is not tracked.`}
               </p>
             </section>
           </div>

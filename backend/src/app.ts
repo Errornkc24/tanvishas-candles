@@ -5,6 +5,7 @@ import * as helmetModule from "helmet";
 import { corsOrigins } from "./config/env.js";
 import { databaseRoutes, paymentRoutes, salesRoutes } from "./routes/index.js";
 import { errorHandler } from "./middleware/error-handler.js";
+import { authRoutes } from "./modules/auth/auth.routes.js";
 
 const helmet = (helmetModule as unknown as {
   default: () => RequestHandler;
@@ -29,6 +30,7 @@ app.use("/api/database", databaseRoutes);
 app.use(express.json({ limit: "32kb" }));
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+app.use("/api/auth", authRoutes);
 app.use("/api/payments", rateLimit({ windowMs: 60_000, limit: 20, standardHeaders: "draft-7", legacyHeaders: false }));
 app.use("/api/payments", paymentRoutes);
 app.use("/api/sales", salesRoutes);

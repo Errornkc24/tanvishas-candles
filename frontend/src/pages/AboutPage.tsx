@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export function About() {
   return (
-    <div className="mx-auto max-w-5xl px-6 py-16">
+    <div className="candle-page-background relative isolate mx-auto max-w-5xl px-6 py-16">
       <Reveal className="text-center">
         <span className="font-brand text-xs tracking-[0.4em] text-primary">OUR STORY</span>
         <h1 className="mt-3 text-5xl sm:text-6xl">Light, slowly made</h1>

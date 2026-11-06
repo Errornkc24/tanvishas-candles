@@ -1,17 +1,22 @@
 import { queryOptions } from "@/hooks/use-query";
-import { apiGet } from "@/services/api-client";
-import type { SalesOrder } from "@/lib/sales-helpers";
+import { supabase } from "@/lib/supabase";
+import type { Granularity, SalesReport } from "@/lib/sales-helpers";
 
-export const adminSalesQuery = queryOptions({
-  queryKey: ["admin", "sales"],
-  queryFn: async (): Promise<SalesOrder[]> => {
-    const orders: SalesOrder[] = [];
-    // Page all history, rather than silently limiting reports to the latest 1,000 orders.
-    for (let offset = 0; ; offset += 100) {
-      const page = await apiGet<SalesOrder[]>(`/sales/orders?offset=${offset}&limit=100`);
-      orders.push(...page);
-      if (page.length < 100) break;
-    }
-    return orders;
+export const adminSalesReportQuery = (
+  from: string,
+  to: string,
+  group: Granularity,
+  enabled = true,
+) => queryOptions({
+  queryKey: ["admin", "sales-report", from, to, group],
+  enabled,
+  queryFn: async (): Promise<SalesReport> => {
+    const { data, error } = await supabase.rpc("admin_sales_report", {
+      _from: from,
+      _to: to,
+      _group: group,
+    });
+    if (error) throw error;
+    return data as unknown as SalesReport;
   },
 });

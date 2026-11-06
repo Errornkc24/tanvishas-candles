@@ -18,6 +18,28 @@ export type SalesOrder = Pick<
   >[];
 };
 export type Granularity = "day" | "month" | "year";
+export type SalesReport = {
+  effective_from: string;
+  effective_to: string;
+  selected: SalesOrder[];
+  live_count: number;
+  revenue: number;
+  collected: number;
+  outstanding: number;
+  subtotal: number;
+  shipping: number;
+  cancelled: number;
+  cancelled_value: number;
+  cancelled_paid: number;
+  average: number;
+  units: number;
+  products: { name: string; units: number; revenue: number }[];
+  periods: { period: string; orders: number; revenue: number; collected: number; cancelled: number }[];
+  statuses: Record<string, number>;
+  payments: { label: string; method: string; count: number; value: number; paid: number; pending: number }[];
+  prior_revenue: number;
+  growth_percent: number | null;
+};
 export const indiaDate = (value: string | Date) => {
   const d = new Date(new Date(value).getTime() + 330 * 60_000);
   return d.toISOString().slice(0, 10);

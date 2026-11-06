@@ -16,17 +16,17 @@ const testimonials = [
   {
     name: "Priya S.",
     city: "Mumbai",
-    text: "Lavender Moon is now part of my bedtime ritual. The scent fills the whole room without being overpowering.",
+    text: "The Daisy Candle adds such a cheerful touch to my bedside table. The handmade details make it feel special.",
   },
   {
     name: "Ananya R.",
     city: "Bengaluru",
-    text: "Gifted Rose & Oud to my sister — the packaging felt so premium. She's already asked for another.",
+    text: "I gifted the Lotus Urli Candle to my sister — she loved its delicate shape and has already found a place for it at home.",
   },
   {
     name: "Meera K.",
     city: "Ahmedabad",
-    text: "Cinnamon Chai smells exactly like monsoon evenings at home. Clean burn, lasts forever.",
+    text: "The Iced Coffee Latte Candle looks lovely on my coffee table. It makes such a fun gift for coffee lovers.",
   },
 ];
 
@@ -61,7 +61,7 @@ export function Home() {
   const best = (products ?? []).filter((p) => p.bestseller).slice(0, 4);
 
   return (
-    <div className="home-candle-background relative isolate">
+    <div className="candle-page-background relative isolate">
       {/* Hero */}
       <section className="relative -mt-16 overflow-hidden pt-16 sm:-mt-20 sm:pt-20">
         <AmbientBackground density={1.8} />

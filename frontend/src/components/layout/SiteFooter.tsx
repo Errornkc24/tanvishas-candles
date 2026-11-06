@@ -7,7 +7,7 @@ export const CONTACT_EMAIL = "tanvishascandles@gmail.com";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-0 border-t bg-background/60">
+    <footer className="mt-0 border-t bg-background">
       <div className="mx-auto grid max-w-7xl gap-8 px-6 py-12 sm:grid-cols-2">
         <div>
           <div className="flex items-center gap-4">

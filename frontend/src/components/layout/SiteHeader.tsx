@@ -1,9 +1,11 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useQueryClient } from "@/hooks/use-query";
+import { useQuery, useQueryClient } from "@/hooks/use-query";
 import { Menu, Package, ShoppingBag, User, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useRoles } from "@/hooks/useAdmin";
+import { isAdminRole, storeHasOwnerQuery } from "@/services/admin.service";
 import { supabase } from "@/lib/supabase";
 import {
   DropdownMenu,
@@ -25,6 +27,13 @@ const nav = [
 export function SiteHeader() {
   const { count, setOpen, bump } = useCart();
   const { user } = useAuth();
+  const { data: roles, isLoading: rolesLoading } = useRoles();
+  const isAdmin = isAdminRole(roles);
+  const { data: storeHasOwner } = useQuery({
+    ...storeHasOwnerQuery,
+    enabled: !!user && !rolesLoading && !isAdmin,
+  });
+  const canOpenAdmin = isAdmin || storeHasOwner === false;
   const location = useLocation();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -163,9 +172,11 @@ export function SiteHeader() {
                 <DropdownMenuItem onClick={() => navigate("/orders")}>
                   <Package /> My orders
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/admin")}>
-                  <Package /> Store admin
-                </DropdownMenuItem>
+                {canOpenAdmin && (
+                  <DropdownMenuItem onClick={() => navigate("/admin")}>
+                    <Package /> Store admin
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}>
                   <LogOut /> Sign out

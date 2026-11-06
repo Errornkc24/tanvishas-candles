@@ -7,15 +7,22 @@ export async function getOrderForPayment(orderId: string) {
 }
 
 export async function setRazorpayOrderId(orderId: string, razorpayOrderId: string) {
-  return supabaseAdmin.from("orders").update({ razorpay_order_id: razorpayOrderId }).eq("id", orderId);
+  return supabaseAdmin.rpc("backend_set_razorpay_order", {
+    _order_id: orderId,
+    _razorpay_order_id: razorpayOrderId,
+  });
 }
 
-export async function markOrderPaid(orderId: string, paymentId: string, paidAt: string) {
-  return supabaseAdmin.from("orders").update({
-    payment_method: "online",
-    payment_status: "paid",
-    razorpay_payment_id: paymentId,
-    paid_at: paidAt,
-    updated_at: paidAt,
-  }).eq("id", orderId).neq("payment_status", "paid");
+export async function markOrderPaid(
+  orderId: string,
+  razorpayOrderId: string,
+  paymentId: string,
+  paidAt: string,
+) {
+  return supabaseAdmin.rpc("backend_mark_order_paid", {
+    _order_id: orderId,
+    _razorpay_order_id: razorpayOrderId,
+    _payment_id: paymentId,
+    _paid_at: paidAt,
+  });
 }

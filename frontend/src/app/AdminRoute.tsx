@@ -7,12 +7,25 @@ import { claimStoreOwnership, storeHasOwnerQuery } from "@/services/admin.servic
 import { Button } from "@/components/ui/button";
 
 export function AdminRoute() {
-  const { data: roles, isLoading } = useRoles();
+  const { data: roles, isLoading, isError: rolesError } = useRoles();
   const allowed = isAdminRole(roles);
-  const { data: hasOwner } = useQuery({ ...storeHasOwnerQuery, enabled: !isLoading && !allowed });
+  const {
+    data: hasOwner,
+    error: ownerError,
+  } = useQuery({ ...storeHasOwnerQuery, enabled: !isLoading && !allowed && !rolesError });
 
   if (isLoading) return <div className="py-32 text-center text-muted-foreground">Loading…</div>;
   if (allowed) return <Outlet />;
+  if (rolesError || ownerError) {
+    return (
+      <div className="mx-auto max-w-md py-32 text-center">
+        <h1 className="text-4xl">Admin setup incomplete</h1>
+        <p className="mt-3 text-muted-foreground">
+          Store permissions could not be loaded. Apply the Supabase migrations, then try again.
+        </p>
+      </div>
+    );
+  }
   return <NoAccess hasOwner={hasOwner} />;
 }
 
@@ -29,8 +42,13 @@ function NoAccess({ hasOwner }: { hasOwner: boolean | undefined }) {
           <Button
             className="mt-6"
             onClick={async () => {
-              const { error } = await claimStoreOwnership();
+              const { data, error } = await claimStoreOwnership();
               if (error) return void toast.error(error.message);
+              if (!data) {
+                toast.error("Store ownership has already been claimed. Ask an owner to add you.");
+                await queryClient.invalidateQueries();
+                return;
+              }
               toast.success("You're now the store owner");
               await queryClient.invalidateQueries();
             }}

@@ -137,20 +137,32 @@
   }
 }
 
-.home-candle-background {
+.candle-page-background {
+  position: relative;
+  isolation: isolate;
+}
+
+.candle-page-background::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background-image:
-    linear-gradient(rgb(251 245 235 / 58%), rgb(251 245 235 / 68%)),
+    linear-gradient(rgb(251 245 235 / 70%), rgb(251 245 235 / 78%)),
     url("/images/catalog/lotus-candle.webp");
   background-position: center, center center;
   background-size: 100% 100%, auto 100vh;
-  background-attachment: fixed;
   background-repeat: no-repeat, no-repeat;
 }
 
 @media (min-width: 768px) {
-  .home-candle-background {
-    background-position: center top;
-    background-size: 100vw auto;
+  .candle-page-background::before {
+    background-image:
+      linear-gradient(rgb(251 245 235 / 70%), rgb(251 245 235 / 78%)),
+      url("/images/lotus-candles-desktop.png");
+    background-position: center, center center;
+    background-size: 100% 100%, cover;
     background-repeat: no-repeat;
   }
 }

@@ -50,7 +50,8 @@ export function Account() {
   const refresh = () => qc.invalidateQueries({ queryKey: ["addresses", uid] });
 
   async function makeDefault(id: string) {
-    await setDefaultAddress(uid, id);
+    const { error } = await setDefaultAddress(id);
+    if (error) return void toast.error("Couldn't update the default address");
     refresh();
   }
 

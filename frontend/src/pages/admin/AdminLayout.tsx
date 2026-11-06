@@ -13,7 +13,7 @@ import {
   Users,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { adminProductsQuery, isLowStock } from "@/services/admin.service";
+import { adminDashboardQuery } from "@/services/admin.service";
 import { useRoles } from "@/hooks/useAdmin";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -25,8 +25,8 @@ export function AdminLayout() {
 
 function AdminShell({ isOwner }: { isOwner: boolean }) {
   const qc = useQueryClient();
-  const { data: products = [] } = useQuery(adminProductsQuery);
-  const low = products.filter(isLowStock);
+  const { data: dashboard } = useQuery(adminDashboardQuery);
+  const low = dashboard?.low_stock ?? [];
 
   useEffect(() => {
     const ch = supabase

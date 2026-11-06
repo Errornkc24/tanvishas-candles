@@ -23,7 +23,6 @@ export async function saveCartItem(userId: string, productId: string, quantity: 
     user_id: userId,
     product_id: productId,
     quantity,
-    updated_at: new Date().toISOString(),
   });
 }
 

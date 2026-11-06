@@ -40,10 +40,7 @@ export async function updateProfile(
   uid: string,
   values: Database["public"]["Tables"]["profiles"]["Update"],
 ) {
-  return supabase
-    .from("profiles")
-    .update({ ...values, updated_at: new Date().toISOString() })
-    .eq("id", uid);
+  return supabase.from("profiles").update(values).eq("id", uid);
 }
 
 export async function createAddress(values: AddressInput) {
@@ -61,11 +58,6 @@ export async function deleteAddress(id: string) {
   return supabase.from("addresses").delete().eq("id", id);
 }
 
-export async function setDefaultAddress(userId: string, addressId: string) {
-  const clear = await supabase
-    .from("addresses")
-    .update({ is_default: false })
-    .eq("user_id", userId);
-  if (clear.error) return clear;
-  return supabase.from("addresses").update({ is_default: true }).eq("id", addressId);
+export function setDefaultAddress(addressId: string) {
+  return supabase.rpc("set_default_address", { _address_id: addressId });
 }

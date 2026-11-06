@@ -23,6 +23,20 @@ async function getPayableOrder(orderId: string, userId: string) {
 export async function createPaymentOrder(orderId: string, userId: string) {
   const { id, secret } = paymentCredentials();
   const order = await getPayableOrder(orderId, userId);
+  if (order.razorpay_order_id) {
+    const contact = (order.contact ?? {}) as Contact;
+    return {
+      keyId: id,
+      razorpayOrderId: order.razorpay_order_id,
+      amount: Math.round(Number(order.total) * 100),
+      orderNumber: order.order_number,
+      prefill: {
+        name: [contact.first_name, contact.last_name].filter(Boolean).join(" "),
+        email: contact.email ?? "",
+        contact: contact.phone ?? "",
+      },
+    };
+  }
   const response = await fetch("https://api.razorpay.com/v1/orders", {
     method: "POST",
     headers: {
@@ -42,8 +56,8 @@ export async function createPaymentOrder(orderId: string, userId: string) {
   }
 
   const razorpayOrder = (await response.json()) as { id: string; amount: number };
-  const { error } = await setRazorpayOrderId(order.id, razorpayOrder.id);
-  if (error) throw new Error("Could not save the payment reference");
+  const { data: attached, error } = await setRazorpayOrderId(order.id, razorpayOrder.id);
+  if (error || !attached) throw new Error("The order changed before payment could start. Please try again.");
 
   const contact = (order.contact ?? {}) as Contact;
   return {
@@ -69,7 +83,6 @@ export async function verifyPayment(input: {
   const { data: order, error } = await getOrderForPayment(input.orderId);
   if (error) throw new Error("Could not verify the order");
   if (!order || order.user_id !== userId) throw new Error("Order not found");
-  if (order.status === "cancelled") throw new Error("This order was cancelled");
   if (order.payment_status === "paid") return { ok: true };
   if (order.razorpay_order_id !== input.razorpay_order_id) throw new Error("Payment does not match this order");
 
@@ -77,7 +90,13 @@ export async function verifyPayment(input: {
     throw new Error("Payment could not be verified");
   }
 
-  const { error: updateError } = await markOrderPaid(order.id, input.razorpay_payment_id, new Date().toISOString());
-  if (updateError) throw new Error("Payment was verified but the order update failed");
+  const { data: marked, error: updateError } = await markOrderPaid(
+    order.id,
+    input.razorpay_order_id,
+    input.razorpay_payment_id,
+    new Date().toISOString(),
+  );
+  if (updateError || !marked)
+    throw new Error("Payment was verified but the order changed before it could be recorded.");
   return { ok: true };
 }

@@ -1,33 +1,22 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@/hooks/use-query";
 import {
-  adminOrdersQuery,
-  adminProductsQuery,
+  adminDashboardQuery,
   contactOf,
   fmtDate,
-  isLowStock,
 } from "@/services/admin.service";
 import { formatINR, STATUS_LABEL } from "@/lib/shop-helpers";
 
 export function Dashboard() {
-  const { data: orders = [] } = useQuery(adminOrdersQuery);
-  const { data: products = [] } = useQuery(adminProductsQuery);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const month = new Date(today.getFullYear(), today.getMonth(), 1);
-  const live = orders.filter((o) => o.status !== "cancelled");
-  const todays = live.filter((o) => new Date(o.created_at) >= today);
-  const monthRev = live
-    .filter((o) => new Date(o.created_at) >= month)
-    .reduce((s, o) => s + Number(o.total), 0);
-  const pending = orders.filter((o) => ["placed", "confirmed", "packed"].includes(o.status));
-  const low = products.filter(isLowStock);
+  const { data: summary } = useQuery(adminDashboardQuery);
+  const orders = summary?.recent_orders ?? [];
+  const low = summary?.low_stock ?? [];
 
   const stats = [
-    { label: "Orders today", value: todays.length },
-    { label: "Sales today", value: formatINR(todays.reduce((s, o) => s + Number(o.total), 0)) },
-    { label: "Sales this month", value: formatINR(monthRev) },
-    { label: "To pack & ship", value: pending.length },
+    { label: "Orders today", value: summary?.orders_today ?? 0 },
+    { label: "Sales today", value: formatINR(summary?.sales_today ?? 0) },
+    { label: "Sales this month", value: formatINR(summary?.sales_this_month ?? 0) },
+    { label: "To pack & ship", value: summary?.to_pack_count ?? 0 },
   ];
 
   return (
@@ -48,11 +37,11 @@ export function Dashboard() {
               View all
             </Link>
           </div>
-          {orders.length === 0 ? (
+          {summary && orders.length === 0 ? (
             <p className="mt-4 text-sm text-muted-foreground">No orders yet.</p>
           ) : (
             <ul className="mt-4 divide-y divide-border">
-              {orders.slice(0, 8).map((o) => (
+              {orders.map((o) => (
                 <li key={o.id}>
                   <Link
                     to={`/admin/orders/${o.id}`}

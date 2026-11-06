@@ -416,6 +416,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auth_session_is_current: {
+        Args: never
+        Returns: boolean
+      }
+      get_auth_session_expiry: {
+        Args: { _session_id: string }
+        Returns: string | null
+      }
       admin_adjust_stock: {
         Args: {
           _change: number
@@ -424,6 +432,24 @@ export type Database = {
           _reason: string
         }
         Returns: number
+      }
+      admin_dashboard_summary: { Args: never; Returns: Json }
+      backend_mark_order_paid: {
+        Args: {
+          _order_id: string
+          _paid_at: string
+          _payment_id: string
+          _razorpay_order_id: string
+        }
+        Returns: boolean
+      }
+      backend_set_razorpay_order: {
+        Args: { _order_id: string; _razorpay_order_id: string }
+        Returns: boolean
+      }
+      admin_sales_report: {
+        Args: { _from: string; _group: string; _to: string }
+        Returns: Json
       }
       admin_set_role: {
         Args: {
@@ -467,6 +493,10 @@ export type Database = {
         Returns: Json
       }
       store_has_owner: { Args: never; Returns: boolean }
+      set_default_address: {
+        Args: { _address_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "owner" | "staff" | "customer"

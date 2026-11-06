@@ -57,7 +57,7 @@ export function Shop() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+    <div className="candle-page-background relative isolate mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="text-center">
         <span className="font-brand text-xs tracking-[0.4em] text-primary">THE COLLECTION</span>
         <h1 className="mt-2 text-5xl">Shop Candles</h1>
