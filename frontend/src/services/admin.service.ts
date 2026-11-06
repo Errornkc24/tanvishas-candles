@@ -95,6 +95,14 @@ export function createProduct(values: Database["public"]["Tables"]["products"]["
   return supabase.from("products").insert(values).select("id").single();
 }
 
+export async function deleteProduct(productId: string) {
+  const { data, error } = await supabase.rpc("admin_delete_product", {
+    _product_id: productId,
+  });
+  if (error) throw error;
+  return data;
+}
+
 export function contactOf(o: Pick<Order, "contact">) {
   return (o.contact ?? {}) as Record<string, string>;
 }

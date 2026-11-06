@@ -8,3 +8,4 @@ export const adminRoutes = Router();
   adminRoutes.all("/rest/v1/rpc/claim_owner", requireAuth, adminController);
   adminRoutes.all("/rest/v1/rpc/admin_dashboard_summary", requireAuth, adminController);
   adminRoutes.all("/rest/v1/rpc/admin_sales_report", requireAuth, adminController);
+  adminRoutes.all("/rest/v1/rpc/admin_delete_product", requireAuth, adminController);

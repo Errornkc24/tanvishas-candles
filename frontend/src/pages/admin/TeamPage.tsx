@@ -22,7 +22,13 @@ export function Team() {
     qc.invalidateQueries({ queryKey: ["admin", "team"] });
   }
 
-  if (error) return <p className="text-muted-foreground">Only the owner can manage the team.</p>;
+  if (error) {
+    const message =
+      typeof error === "object" && error !== null && "message" in error
+        ? String(error.message)
+        : String(error);
+    return <p className="text-muted-foreground">Could not load team: {message}</p>;
+  }
   return (
     <div className="space-y-4">
       <h2 className="text-3xl">Team</h2>

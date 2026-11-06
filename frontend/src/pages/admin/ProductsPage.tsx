@@ -1,8 +1,8 @@
 import { useQuery, useQueryClient } from "@/hooks/use-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
-import { createProduct, updateProduct } from "@/services/admin.service";
+import { Plus, Trash2 } from "lucide-react";
+import { createProduct, deleteProduct, updateProduct } from "@/services/admin.service";
 import { adjustStock, setInitialStock } from "@/services/stock.service";
 import { adminProductsQuery, isLowStock, slugify } from "@/services/admin.service";
 import { categoriesQuery } from "@/services/categories.service";
@@ -28,6 +28,17 @@ export function Products() {
     qc.invalidateQueries({ queryKey: ["admin"] });
     qc.invalidateQueries({ queryKey: ["products"] });
   };
+
+  async function removeProduct(product: P) {
+    if (!confirm(`Delete “${product.name}”? Products with order or stock history will be hidden instead.`)) return;
+    try {
+      const result = await deleteProduct(product.id);
+      toast.success(result === "deleted" ? "Product deleted" : "Product hidden to preserve its history");
+      refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete this product.");
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -115,6 +126,14 @@ export function Products() {
                 >
                   Edit
                 </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  aria-label={`Delete ${p.name}`}
+                  onClick={() => void removeProduct(p)}
+                >
+                  <Trash2 />
+                </Button>
               </div>
             </article>
           ))
@@ -167,6 +186,14 @@ export function Products() {
                   </Button>{" "}
                   <Button size="sm" variant="ghost" onClick={() => setEditing(p)}>
                     Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    aria-label={`Delete ${p.name}`}
+                    onClick={() => void removeProduct(p)}
+                  >
+                    <Trash2 />
                   </Button>
                 </td>
               </tr>

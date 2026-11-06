@@ -4,4 +4,5 @@ export const adminResources = [
   "/rpc/claim_owner",
   "/rpc/admin_dashboard_summary",
   "/rpc/admin_sales_report",
+  "/rpc/admin_delete_product",
 ] as const;

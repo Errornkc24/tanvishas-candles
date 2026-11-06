@@ -434,6 +434,7 @@ export type Database = {
         Returns: number
       }
       admin_dashboard_summary: { Args: never; Returns: Json }
+      admin_delete_product: { Args: { _product_id: string }; Returns: string }
       backend_mark_order_paid: {
         Args: {
           _order_id: string
