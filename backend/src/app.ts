@@ -1,6 +1,6 @@
 import cors from "cors";
 import express from "express";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit"
 import * as helmetModule from "helmet";
 import { corsOrigins } from "./config/env.js";
 import { databaseRoutes, paymentRoutes, salesRoutes } from "./routes/index.js";
