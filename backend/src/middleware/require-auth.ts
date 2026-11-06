@@ -81,7 +81,11 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 /** Validate signed-in requests on otherwise public catalog routes, while allowing guests. */
 export async function optionalAuth(req: Request, res: Response, next: NextFunction) {
   const token = bearerToken(req);
-  if (!token || token === env.SUPABASE_ANON_KEY) {
+  const apiKey = req.header("apikey");
+  // supabase-js uses the configured public API key as its fallback bearer token
+  // when there is no signed-in session. That key may be the newer publishable
+  // key, which differs from the backend's legacy anon key.
+  if (!token || token === env.SUPABASE_ANON_KEY || token === apiKey) {
     next();
     return;
   }

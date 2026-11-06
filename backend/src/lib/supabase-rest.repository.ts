@@ -53,7 +53,13 @@ export async function forwardSupabaseResource(
   try {
     const target = new URL(`/rest/v1${resource}${search}`, env.SUPABASE_URL);
     const headers = new Headers();
+    const authorization = req.header("authorization");
+    const bearer = authorization?.startsWith("Bearer ") ? authorization.slice(7) : "";
+    const publicApiKey = req.header("apikey") || env.SUPABASE_ANON_KEY;
+    const isPublicCredential =
+      !bearer || bearer === env.SUPABASE_ANON_KEY || bearer === publicApiKey;
     for (const name of forwardedHeaders) {
+      if (name === "authorization" && isPublicCredential) continue;
       const value = req.header(name);
       if (value) headers.set(name, value);
     }
